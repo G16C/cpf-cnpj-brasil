@@ -32,5 +32,6 @@ jobs:
           pip install .[dev]
           
       - name: Run Tests
-        # No Windows, o pytest funciona da mesma forma via CLI
-        run: pytest --cov=cpf_cnpj_brasil
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest --cov=cpf_cnpj_brasil tests/
