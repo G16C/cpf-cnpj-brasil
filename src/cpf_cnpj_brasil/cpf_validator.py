@@ -31,14 +31,19 @@ class CPFValidator:
         # Converter para string se for inteiro
         if isinstance(cpf, int):
             cpf = str(cpf).zfill(11)
+        
 
+        # Verifica se a string contém apenas números, pontos ou traços
+        if not re.fullmatch(r'[0-9.-]+', cpf):
+            raise ValueError("CPF contém caracteres inválidos.")
+        
         # Extrair dígitos numéricos
         numeric_digits = re.sub(r'\D', '', cpf)
 
         # Verificar se tem 11 dígitos, todos numéricos e é string
-        if not isinstance(numeric_digits, str) or len(numeric_digits) != 11 or not numeric_digits.isdigit():
-            raise ValueError(
-                "CPF com formato inválido. Deve ser uma string de 11 dígitos numéricos ou um inteiro.")
+        if len(numeric_digits) != 11:
+            raise ValueError("CPF deve ter 11 dígitos numéricos.")
+            
         return numeric_digits
 
     def _calculate_digit(self, partial_cpf):
@@ -95,19 +100,21 @@ class CPFValidator:
         Retorna:
             bool: True se válido, False caso contrário.
         """
-
+        try:
+            
         # Validar formato do CPF
-        cpf = self._validate_input_format(cpf)
-
+            cpf_clean = self._validate_input_format(cpf)
+        except ValueError:
+            return False  # Agora o teste receberá False em vez de erro ou string
+        
         # Verificar se todos os dígitos são iguais
-        if cpf == cpf[0] * len(cpf):
-            return False  # CPF com todos os dígitos iguais é inválido
-
+        if cpf_clean == cpf_clean[0] * len(cpf_clean):
+            return False
         # Calcular primeiro dígito verificador
-        digit1 = self._calculate_digit(cpf[:9])
+        digit1 = self._calculate_digit(cpf_clean[:9])
 
         # Calcular segundo dígito verificador
-        digit2 = self._calculate_digit(cpf[:9] + str(digit1))
+        digit2 = self._calculate_digit(cpf_clean[:9] + str(digit1))
 
         # Verificar se os dígitos calculados correspondem aos dígitos do CPF
-        return cpf[-2:] == f"{digit1}{digit2}"
+        return cpf_clean[-2:] == f"{digit1}{digit2}"
